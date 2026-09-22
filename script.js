@@ -127,6 +127,11 @@ function processSelectedFile(f) {
                     if (colName === "Change ID Caused By Request") colName = "Change ID";
                     if (colName === "Change Title Caused By Request" || colName === "Subject") colName = "Description";
                     
+                    // Sprint Number Mapping
+                    if (colName === "Sprint" || colName === "Sprint #" || colName === "Sprint No" || colName === "Sprint No.") {
+                        colName = "Sprint Number";
+                    }
+
                     // Special Release Request ID & Title Replacements
                     if (colName === "Linked Request ID") colName = "Special Release Request ID";
                     if (colName === "Linked Request Title") colName = "Special Release Request Title";
@@ -157,6 +162,11 @@ function processSelectedFile(f) {
                         rowObj[colName] = cleanVal;
                         if (cleanVal) rowHasValue = true;
                     }
+                }
+
+                // Ensure Sprint Number property exists even if missing in original uploaded file
+                if (!rowObj.hasOwnProperty('Sprint Number')) {
+                    rowObj['Sprint Number'] = "";
                 }
 
                 // Fallback Logic: If RequestID or Description are empty, fallback to Special Release Request values
@@ -202,7 +212,9 @@ function getActiveHeaders(data, includeDepartment = true, includeTechnician = tr
     const baseHeaders = [];
 
     if (includeDepartment) baseHeaders.push('Department');
-    baseHeaders.push('Change Type', 'RequestID', 'Change ID', 'Description');
+    
+    // Always include 'Sprint Number' so users can fill it manually
+    baseHeaders.push('Sprint Number', 'Change Type', 'RequestID', 'Change ID', 'Description');
 
     if (includeSpecial) {
         baseHeaders.push('Special Release Request ID', 'Special Release Request Title');
@@ -321,7 +333,7 @@ async function handleExport(includeTechnician) {
 
     const exportDateStr = getFormattedTodayDate();
     const customWidths = {
-        'Department': 25, 'Change Type': 15, 'RequestID': 16,
+        'Department': 25, 'Sprint Number': 16, 'Change Type': 15, 'RequestID': 16,
         'Change ID': 14, 'Description': 65, 'Special Release Request ID': 22,
         'Special Release Request Title': 42, 'Technician': 22,
         'Requester': 22, 'UAT Owner': 22, 'UAT Date': 14, 'Request Status': 16
